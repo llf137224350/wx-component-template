@@ -3,9 +3,9 @@
  * @Date: 2020/6/17
  * @Description: 创建页面
  */
-const os = require('os');
 const path = require('path');
 const fs = require('fs');
+const pathExists = require('path-exists').sync;
 const log = require('./log');
 require('console-color-mr');
 // 降低允许权限
@@ -16,12 +16,37 @@ const currentDirName = targetPath.substring(
   targetPath.lastIndexOf(path.sep) + 1
 );
 // 模板路径
-const sourcePath = path.resolve(__dirname, '../template');
+let sourcePath = path.resolve(__dirname, '../template');
+// 作者
+let author = '';
 const componentName = process.argv.slice(2)[0];
 if (!componentName) {
   log.error('', '请传入组件名称!');
   return;
 }
+
+// 获取package.json文件所在位置
+function getPackageJson() {
+  let dirs = targetPath.replace(/\\/g, '/').split('/');
+  let index = 0;
+  while (index < dirs.length) {
+    if (index === 0) {
+      dirs[index] = '';
+    } else {
+      dirs[index] = dirs[index - 1] + '/' + dirs[index];
+    }
+    index++;
+  }
+  dirs = dirs
+    .map(function (dir) {
+      return dir + '/package.json';
+    })
+    .reverse();
+  return dirs.find(function (filePath) {
+    return pathExists(filePath);
+  });
+}
+
 // 日期格式化
 function dateFormat(date, fmt = 'yyyy-MM-dd hh:mm:ss') {
   const o = {
@@ -102,13 +127,12 @@ function getName() {
 function readFileContent(path, fileName) {
   let content = fs.readFileSync(path).toString();
   if (fileName.indexOf('.js') !== -1 && fileName.indexOf('.json') === -1) {
-    content = content.replace(/\$/gi, getName()) + os.EOL;
-    // 替换年月日
-    content = content.replace(/date/g, dateFormat(new Date()));
-    writeContent2File(content.replace(os.EOL, ''), fileName);
-  } else {
-    writeContent2File(content, fileName);
+    // 替换作者
+    content = content.replace(/\$author/g, author);
+    // 替换日期
+    content = content.replace(/\$date/g, dateFormat(new Date()));
   }
+  writeContent2File(content, fileName);
 }
 
 // 读取目录下所有文件
@@ -147,5 +171,28 @@ function makeSourceDir() {
     }
   );
 }
-
+// 获取package.json文件，判断是否配置了pageTemplateDir
+const packageJsonPath = getPackageJson();
+if (packageJsonPath) {
+  const package = require(packageJsonPath);
+  if (package && package.componentTemplateConfig) {
+    // 配置了路径
+    if (
+      package.componentTemplateConfig.componentTemplateDir &&
+      !pathExists(package.componentTemplateConfig.componentTemplateDir)
+    ) {
+      log.error('', '配置的componentTemplateDir目录不存在，请检查!');
+      return;
+    } else {
+      // 作者
+      author = package.componentTemplateConfig.author || package.author || '';
+      // 配置了模板路径
+      if (package.componentTemplateConfig.componentTemplateDir) {
+        sourcePath = package.componentTemplateConfig.componentTemplateDir;
+      }
+    }
+  } else {
+    author = package.author || '';
+  }
+}
 makeSourceDir();
