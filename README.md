@@ -3,6 +3,7 @@
 * 安装 npm install wx-component-template-js -g
   * 1. 进入需要创建组件的目录
   * 2. component 组件名称，名称多个单词时使用下横线连接。如：component hello_world
+  * 3. 如果文件时ts，类名出可以使用 $ 代替，会自动替换为输入的名称 如HelloWorld
 
 ## 个性化配置（package.json）
 ```javascript

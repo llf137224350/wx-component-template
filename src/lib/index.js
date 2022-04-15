@@ -126,11 +126,12 @@ function getName() {
 // 读取文件内容
 function readFileContent(path, fileName) {
   let content = fs.readFileSync(path).toString();
-  if (fileName.indexOf('.js') !== -1 && fileName.indexOf('.json') === -1) {
+  if (fileName.indexOf('.js') !== -1 && fileName.indexOf('.json') === -1 || fileName.indexOf('.ts') !== -1) {
     // 替换作者
     content = content.replace(/\$author/g, author);
     // 替换日期
     content = content.replace(/\$date/g, dateFormat(new Date()));
+    content = content.replace(/\$/gi, getName());
   }
   writeContent2File(content, fileName);
 }
