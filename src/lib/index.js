@@ -38,11 +38,11 @@ function getPackageJson() {
     index++;
   }
   dirs = dirs
-    .map(function (dir) {
+    .map(function(dir) {
       return dir + '/package.json';
     })
     .reverse();
-  return dirs.find(function (filePath) {
+  return dirs.find(function(filePath) {
     return pathExists(filePath);
   });
 }
@@ -84,6 +84,7 @@ function writeContent2File(content, fileName) {
   // 写入数据到对应文件
   fs.writeFileSync(tempPath, data);
 }
+
 // 首字母大写
 function firstLetterCapitalized(str) {
   if (!str) {
@@ -93,6 +94,7 @@ function firstLetterCapitalized(str) {
   const other = str.slice(1);
   return firstLetter.toUpperCase() + other;
 }
+
 // 获取类名
 function getName() {
   const arr = componentName.split('_');
@@ -123,6 +125,7 @@ function getName() {
   );
   return result;
 }
+
 // 读取文件内容
 function readFileContent(path, fileName) {
   let content = fs.readFileSync(path).toString();
@@ -131,7 +134,10 @@ function readFileContent(path, fileName) {
     content = content.replace(/\$author/g, author);
     // 替换日期
     content = content.replace(/\$date/g, dateFormat(new Date()));
-    content = content.replace(/\$/gi, getName());
+    // 如果是TS尝试替换类名
+    if (fileName.indexOf('.ts') !== -1) {
+      content = content.replace(/class\s+\$/i, 'class ' + getName());
+    }
   }
   writeContent2File(content, fileName);
 }
@@ -172,6 +178,7 @@ function makeSourceDir() {
     }
   );
 }
+
 // 获取package.json文件，判断是否配置了pageTemplateDir
 const packageJsonPath = getPackageJson();
 if (packageJsonPath) {
