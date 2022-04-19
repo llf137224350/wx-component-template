@@ -1,6 +1,6 @@
 {
   "name": "wx-component-template",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "微信小程序组件模板",
   "main": "./src/index.js",
   "bin": {
@@ -26,6 +26,8 @@
   "homepage": "https://github.com/llf137224350/wx-component-template#readme",
   "dependencies": {
     "console-color-mr": "^2.0.2",
+    "convert-filepath": "^1.0.0",
+    "dir-split": "^1.0.1",
     "import-local": "^3.0.3",
     "npmlog": "4",
     "path-exists": "4",
